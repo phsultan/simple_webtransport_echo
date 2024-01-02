@@ -2,35 +2,43 @@ package webtransport
 
 import (
   "context"
+	"io"
   "log"
+	"time"
   "github.com/quic-go/webtransport-go"
 )
 
+const maxBufferLength = 1024
+
 func handleSession(session *webtransport.Session) {
   // Logic for handling a session...
-  stream, err := session.AcceptUniStream(context.Background())
+  stream, err := session.AcceptStream(context.Background())
   if err != nil {
     log.Println(err)
-      return
+		return
   }
-  log.Printf("uni stream accepted, id: %d", stream.StreamID())
+  log.Printf("stream accepted, id: %d", stream.StreamID())
 
-  indication, err := receiveClientIndication(stream)
-  if err != nil {
-    log.Println(err)
-      return
-  }
-  log.Printf("client indication: %+v", indication)
+	// read no more than maxClientIndicationLength bytes.
+	reader := io.LimitReader(stream, maxBufferLength)
+	writer := io.Writer(stream)
 
-  if err := validateClientIndication(indication); err != nil {
-    log.Println(err)
-      return
-  }
+	buf := make([]byte, maxBufferLength)
+	n, err := reader.Read(buf)
+	if err != nil {
+		if err != io.EOF {
+			log.Printf("Error :%s", err)
+		}
+	}
 
-  // this method blocks.
-  if err := communicate(session); err != nil {
-    log.Println(err)
-  }
+	log.Printf("Read %d bytes", n)
+	value := string(buf)
+
+	log.Printf("value :%s", value)
+
+	time.Sleep(2 * time.Second)
+	writer.Write(buf)
+
+
+	time.Sleep(4 * time.Second)
 }
-
-

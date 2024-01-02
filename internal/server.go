@@ -9,10 +9,6 @@ import (
 )
 
 func StartServer(certFile string, keyFile string) error {
- //	certFile := "/etc/letsencrypt/live/133.ip-51-91-99.eu/fullchain.pem"
- //	keyFile := "/etc/letsencrypt/live/133.ip-51-91-99.eu/privkey.pem"
-
-
 	// create a new webtransport.Server, listening on (UDP) port 443
 	s := webtransport.Server{
 		H3: http3.Server{Addr: ":4443"},

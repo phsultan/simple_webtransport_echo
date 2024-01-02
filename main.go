@@ -26,7 +26,7 @@ func main() {
 		log.Fatal("KEY_FILE environment variable not set")
 	}
 
-  log.Printf("Starting...")
+  log.Printf("Start...")
   err = webtransport.StartServer(CERT_FILE, KEY_FILE)
   log.Printf("Stopped, err : %s", err)
 }
