@@ -8,10 +8,10 @@ import (
 	"github.com/quic-go/quic-go/http3"
 )
 
-func StartServer(certFile string, keyFile string) error {
-	// create a new webtransport.Server, listening on (UDP) port 443
+func StartServer(certFile string, keyFile string, port string, path string) error {
+	// create a new webtransport.Server, listening on (UDP) port 4443
 	s := webtransport.Server{
-		H3: http3.Server{Addr: ":4443"},
+		H3: http3.Server{Addr: fmt.Sprintf(":%s", port)},
 	}
 
 	s.CheckOrigin = func(r *http.Request) bool {
@@ -25,7 +25,7 @@ func StartServer(certFile string, keyFile string) error {
 		return true
 	}
 
-	http.HandleFunc("/webtransport", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc(fmt.Sprintf("/%s", path), func(w http.ResponseWriter, r *http.Request) {
 		session, err := s.Upgrade(w, r)
 		if err != nil {
 			log.Printf("upgrading failed: %s", err)
