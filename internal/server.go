@@ -25,7 +25,7 @@ func StartServer(certFile string, keyFile string, port string, path string) erro
 		return true
 	}
 
-	http.HandleFunc(fmt.Sprintf("/%s", path), func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		session, err := s.Upgrade(w, r)
 		if err != nil {
 			log.Printf("upgrading failed: %s", err)
