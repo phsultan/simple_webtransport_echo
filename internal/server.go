@@ -1,17 +1,25 @@
 package webtransport
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
-	"github.com/quic-go/webtransport-go"
+	"time"
+	"github.com/quic-go/quic-go"
 	"github.com/quic-go/quic-go/http3"
+	"github.com/quic-go/webtransport-go"
 )
 
 func StartServer(certFile string, keyFile string, port string, path string) error {
 	// create a new webtransport.Server, listening on (UDP) port 4443
 	s := webtransport.Server{
-		H3: http3.Server{Addr: fmt.Sprintf(":%s", port)},
+		H3: http3.Server{
+			Addr: fmt.Sprintf(":%s", port),
+			QUICConfig: &quic.Config{
+				MaxIdleTimeout: 5 * time.Second,
+			},
+		},
 	}
 
 	s.CheckOrigin = func(r *http.Request) bool {
@@ -34,7 +42,16 @@ func StartServer(certFile string, keyFile string, port string, path string) erro
 		}
 
 		log.Printf("Connection succeeded from Origin %s", r.Header["Origin"])
-		log.Printf("Connection succeeded from address %s", session.RemoteAddr())
+		log.Printf("Connection succeeded from address %s", session.RemoteAddr().String())
+
+		ctx := session.Context()
+
+		go func(ctx context.Context) {
+			select {
+			case <-ctx.Done():
+				log.Printf("QUIC context for address %s ended", session.RemoteAddr().String())
+			}
+		}(ctx)
 
 		newSession(session)
 	})
