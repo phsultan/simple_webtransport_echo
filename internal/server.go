@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"time"
+
 	"github.com/quic-go/quic-go"
 	"github.com/quic-go/quic-go/http3"
 	"github.com/quic-go/webtransport-go"
@@ -69,4 +70,3 @@ func newSession(session *webtransport.Session) {
 		handleSession(session)
 	}()
 }
-
